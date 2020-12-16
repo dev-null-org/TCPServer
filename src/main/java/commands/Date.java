@@ -1,23 +1,24 @@
-package Commands;
+package commands;
 
-import Server.ServerClient;
+import server.ServerClient;
 
 import java.util.regex.Pattern;
 
-public class Exit implements Command{
+public class Date implements Command {
+
     @Override
     public Pattern commandPattern() {
-        return Pattern.compile("^exit.*",Pattern.CASE_INSENSITIVE);
+        return Pattern.compile("^date.*", Pattern.CASE_INSENSITIVE);
     }
 
     @Override
     public String commandName() {
-        return "exit";
+        return "date";
     }
 
     @Override
     public ExecutionCode execute(ServerClient client, String message) {
-        client.close();
+        client.println(new java.util.Date().toString());
         return ExecutionCode.SUCCESS;
     }
 }

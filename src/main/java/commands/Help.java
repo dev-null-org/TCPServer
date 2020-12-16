@@ -1,13 +1,13 @@
-package Commands;
+package commands;
 
-import Server.ServerClient;
+import server.ServerClient;
 
 import java.util.regex.Pattern;
 
-public class Help implements Command{
+public class Help implements Command {
     @Override
     public Pattern commandPattern() {
-        return Pattern.compile("^help.*",Pattern.CASE_INSENSITIVE);
+        return Pattern.compile("^help.*", Pattern.CASE_INSENSITIVE);
     }
 
     @Override

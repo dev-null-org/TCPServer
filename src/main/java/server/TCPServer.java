@@ -1,4 +1,4 @@
-package Server;
+package server;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -6,7 +6,6 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Queue;
 
 public class TCPServer implements Runnable, Closeable {
@@ -96,15 +95,17 @@ public class TCPServer implements Runnable, Closeable {
         }
     }
 
-    public Runnable getShutDownHook(){
+    public Runnable getShutDownHook() {
         return new ShutDownHook(this);
     }
 
-    private class ShutDownHook implements Runnable{
-        private TCPServer server;
-        public ShutDownHook(TCPServer server){
-            this.server=server;
+    private static class ShutDownHook implements Runnable {
+        private final TCPServer server;
+
+        public ShutDownHook(TCPServer server) {
+            this.server = server;
         }
+
         @Override
         public void run() {
             server.close();

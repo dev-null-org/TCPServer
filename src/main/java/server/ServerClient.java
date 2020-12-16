@@ -1,12 +1,11 @@
-package Server;
+package server;
 
-import Commands.Command;
-import Commands.CommandManager;
+import commands.Command;
+import commands.CommandManager;
 
 import java.io.*;
 import java.net.Socket;
 import java.net.SocketAddress;
-import java.util.Date;
 
 public class ServerClient implements Runnable,Closeable {
     private final Socket socket;
@@ -71,7 +70,7 @@ public class ServerClient implements Runnable,Closeable {
             output.println("Welcome you can now use commands");
         }
         CommandManager commandManager=CommandManager.getInstance();
-        while (true&&!closed) {
+        while (!closed) {
             String inputString;
             try {
                 inputString = input.readLine();
@@ -79,9 +78,9 @@ public class ServerClient implements Runnable,Closeable {
                     close();
                     break;
                 }
-                server.log("SERVER-CLIENT("+id+"): "+inputString);
-                Command command=commandManager.getCommand(inputString);
-                if (command!=null) {
+                server.log("SERVER-CLIENT(" + id + "): " + inputString);
+                Command command = commandManager.getCommand(inputString);
+                if (command != null) {
                     command.execute(this, inputString);
                 }else{
                     output.println("Unknown command: " + inputString + " use 'help' to see all command available");
