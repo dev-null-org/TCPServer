@@ -5,27 +5,41 @@ import java.io.IOException;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayDeque;
-import java.util.ArrayList;
+import java.util.LinkedList;
 import java.util.Queue;
 
 public class TCPServer implements Runnable, Closeable {
-    private final ServerSocket serverSocket;
+
     private final int maxNumberOfClients;
-    private final ArrayList<ServerClient> clients;
+    private final int maxNumberClientsInPool;
+    private final int maxQueue;
+
+    private final ServerSocket serverSocket;
+    private final LinkedList<ServerClient> clients;
     private final Queue<ServerClient> clientQueue;
+
+    private final LinkedList<ServerClient> usedClients;
 
     private final boolean logging;
 
-    public TCPServer(int portNumber, int maxNumberOfClients, Boolean logging) throws IOException {
-        clientQueue = new ArrayDeque<>();
-        clients = new ArrayList<>();
-        serverSocket = new ServerSocket(portNumber);
+    public TCPServer(int portNumber, int maxNumberOfClients, int maxNumberClientsInPool, int maxQueue, Boolean logging) throws IOException {
+        this.clientQueue = new ArrayDeque<>();
+        this.clients = new LinkedList<>();
+        this.usedClients = new LinkedList<>();
+        this.serverSocket = new ServerSocket(portNumber);
         this.maxNumberOfClients = maxNumberOfClients;
+        this.maxNumberClientsInPool = maxNumberClientsInPool;
+        this.maxQueue = maxQueue;
         this.logging = logging;
+
+    }
+
+    public TCPServer(int portNumber, int maxNumberOfClients, int maxNumberClientsInPool, int maxQueue) throws IOException {
+        this(portNumber, maxNumberOfClients, maxNumberClientsInPool, maxQueue, false);
     }
 
     public TCPServer(int portNumber, int maxNumberOfClients) throws IOException {
-        this(portNumber, maxNumberOfClients, false);
+        this(portNumber, maxNumberOfClients, 100, 50, false);
     }
 
     @Override
@@ -48,18 +62,41 @@ public class TCPServer implements Runnable, Closeable {
     private void connectNewClient(Socket socket) {
         if (socket != null) {
             if (clients.size() < maxNumberOfClients) {
+                ServerClient client = createServerClient(socket, this, false);
                 log("SERVER: NEW client connected (" + socket.getRemoteSocketAddress() + ")");
-                ServerClient client = new ServerClient(socket, this, false);
                 Thread clientThread = new Thread(client);
                 clients.add(client);
                 clientThread.start();
             } else {
-                log("SERVER: List is full putting client to queue");
-                clientQueue.add(new ServerClient(socket, this, true));
+                if (clientQueue.size() >= maxQueue) {
+                    log("SERVER: Queue is full connection has been refused");
+                    try {
+                        socket.close();
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    log("SERVER: List is full putting client to queue");
+                    ServerClient client = createServerClient(socket, this, true);
+                    clientQueue.add(client);
+                }
             }
         } else {
             log("SERVER: error null socket");
         }
+    }
+
+    private ServerClient createServerClient(Socket socket, TCPServer server, boolean inQueue) {
+        ServerClient client;
+        if (usedClients.size() > 0) {
+            log("SERVER: NEW client from object pool");
+            client = usedClients.removeFirst();
+            client.initiateVariables(socket, server, inQueue);
+        } else {
+            log("SERVER: NEW client");
+            client = new ServerClient(socket, server, inQueue);
+        }
+        return client;
     }
 
     public void remove(ServerClient serverClient) {
@@ -71,6 +108,10 @@ public class TCPServer implements Runnable, Closeable {
             Thread clientThread = new Thread(client);
             clients.add(client);
             clientThread.start();
+        }
+        if (usedClients.size() < maxNumberClientsInPool) {
+
+            usedClients.add(serverClient);
         }
     }
 

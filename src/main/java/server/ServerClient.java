@@ -8,22 +8,22 @@ import java.net.Socket;
 import java.net.SocketAddress;
 
 public class ServerClient implements Runnable,Closeable {
-    private final Socket socket;
+    private Socket socket;
     private BufferedReader input;
     private PrintWriter output;
 
-    private final int id;
+    private int id;
 
     private SocketAddress remoteIp;
 
-    private final TCPServer server;
+    private TCPServer server;
 
     private boolean inQueue;
 
     private boolean closed;
 
-    public ServerClient(Socket socket, TCPServer server, boolean inQueue) {
-        closed=false;
+    public void initiateVariables(Socket socket, TCPServer server, boolean inQueue){
+        this.closed=false;
         this.id=this.hashCode();
         this.socket=socket;
         this.server=server;
@@ -44,6 +44,10 @@ public class ServerClient implements Runnable,Closeable {
             close();
             e.printStackTrace();
         }
+    }
+
+    public ServerClient(Socket socket, TCPServer server, boolean inQueue) {
+        initiateVariables(socket,server,inQueue);
     }
 
     public int getId() {
