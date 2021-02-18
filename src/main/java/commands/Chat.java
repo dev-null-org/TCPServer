@@ -1,12 +1,12 @@
 package commands;
 
+import chat.*;
 import server.ServerClient;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Random;
 import java.util.regex.Pattern;
-
-import chat.*;
 
 public class Chat implements Command {
 
@@ -22,21 +22,21 @@ public class Chat implements Command {
 
     @Override
     public void execute(ServerClient client, String message) {
-        User user=getUser(client);
-        ChatRoom room=getChatRoom(client,user);
-        if(user ==null||room==null){
+        User user = getUser(client);
+        ChatRoom room = getChatRoom(client, user);
+        if (user == null || room == null) {
             client.println("Exiting chat command.");
-        }else{
-            ConnectedUser connectedUser=new ConnectedUser(client, user);
+        } else {
+            ConnectedUser connectedUser = new ConnectedUser(client, user);
             room.joinChatRoom(connectedUser);
         }
     }
 
-    private ChatRoom getChatRoom(ServerClient client,User user){
-        ChatLobby chatLobby=ChatLobby.getInstance();
-        ChatRoom room=null;
-        if(user!=null){
-            boolean repeatRoomJoin=true;
+    private ChatRoom getChatRoom(ServerClient client, User user) {
+        ChatLobby chatLobby = ChatLobby.getInstance();
+        ChatRoom room = null;
+        if (user != null) {
+            boolean repeatRoomJoin = true;
             while (repeatRoomJoin) {
                 client.println("Do you want to create new room(C), join exist one(J) or exit(Q)?");
                 String input = client.readLine();
@@ -44,27 +44,29 @@ public class Chat implements Command {
                     case "C":
                         client.println("Should the room have password(Y/N)?");
                         if ("Y".equalsIgnoreCase(client.readLine().trim())) {
+                            client.println("What should the password be?");
                             String password = client.readLine();
                             try {
                                 room = new ChatRoom(password);
-                                client.println("Room created ID("+room.getId()+") joining");
+                                client.println("Room created ID(" + room.getId() + ") joining");
+                                repeatRoomJoin = false;
                             } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
                                 client.println("Something went wrong on the server please contact admin team!!");
                                 repeatRoomJoin = false;
                                 e.printStackTrace();
                             }
-                        }else {
+                        } else {
                             room = new ChatRoom();
-                            client.println("Room created ID("+room.getId()+") joining");
-                            repeatRoomJoin=false;
+                            client.println("Room created ID(" + room.getId() + ") joining");
+                            repeatRoomJoin = false;
                         }
                         break;
                     case "J":
                         client.println("What is the room ID?");
-                        String roomId=client.readLine().trim();
-                        room=chatLobby.getRoom(roomId);
-                        if(room!=null){
-                            if(room.isLocked()){
+                        String roomId = client.readLine().trim();
+                        room = chatLobby.getRoom(roomId);
+                        if (room != null) {
+                            if (room.isLocked()) {
                                 client.println("Room is locked!");
                                 boolean repeatPassword = true;
                                 while (repeatPassword) {
@@ -82,11 +84,11 @@ public class Chat implements Command {
                                         }
                                     }
                                 }
-                            }else{
+                            } else {
                                 client.println("Room found joining");
-                                repeatRoomJoin=false;
+                                repeatRoomJoin = false;
                             }
-                        }else{
+                        } else {
                             client.println("Room with that ID is not existing");
                         }
                         break;
@@ -95,12 +97,13 @@ public class Chat implements Command {
                         break;
                 }
             }
-        }else{
+        } else {
             return null;
         }
         return room;
     }
-    private User getUser(ServerClient client){
+
+    private User getUser(ServerClient client) {
         UserDatabase database = UserDatabase.getInstance();
         boolean repeatLogin = true;
         String userName;
@@ -142,13 +145,23 @@ public class Chat implements Command {
                         client.println("What is your password?");
                         String password = client.readLine();
                         try {
-                            user = new User(userName, new Password(password));
-                            if(database.addUser(user)){
+                            String[] color = new String[]{
+                                    "\u001B[30m",
+                                    "\u001B[31m",
+                                    "\u001B[32m",
+                                    "\u001B[33m",
+                                    "\u001B[34m",
+                                    "\u001B[35m",
+                                    "\u001B[36m",
+                                    "\u001B[37m"};
+                            Random random = new Random();
+                            user = new User(userName, new Password(password), color[random.nextInt(color.length)]);
+                            if (database.addUser(user)) {
                                 client.println("Successfully created account. Welcome!");
-                                repeatLogin=false;
-                            }else{
+                                repeatLogin = false;
+                            } else {
                                 client.println("Something went wrong please try again or contact admin");
-                                user=null;
+                                user = null;
                             }
                         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
                             client.println("Something went wrong on the server please contact admin team!!");
