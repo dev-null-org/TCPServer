@@ -7,7 +7,7 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ChatRoom {
-    private String id;
+    private final String id;
     private final List<Message> messages;
     private Password password;
     private final List<ConnectedUser> connectedUsers;

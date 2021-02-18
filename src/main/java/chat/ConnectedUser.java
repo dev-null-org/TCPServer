@@ -3,8 +3,8 @@ package chat;
 import server.ServerClient;
 
 public class ConnectedUser {
-    protected ServerClient client;
-    protected User user;
+    protected final ServerClient client;
+    protected final User user;
 
     public ConnectedUser(ServerClient client, User user) {
         this.client = client;

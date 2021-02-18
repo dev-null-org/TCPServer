@@ -7,7 +7,7 @@ import java.util.Map;
 public class UserDatabase {
     private static UserDatabase instance;
 
-    private Map<String, User> users;
+    private final Map<String, User> users;
 
     private UserDatabase() {
         users = Collections.synchronizedMap(new HashMap<>());

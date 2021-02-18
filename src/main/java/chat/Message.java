@@ -1,8 +1,8 @@
 package chat;
 
 public class Message {
-    protected User author;
-    private String content;
+    protected final User author;
+    private final String content;
 
     public Message(User author, String content) {
         this.author = author;

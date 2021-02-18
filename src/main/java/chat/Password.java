@@ -17,7 +17,7 @@ public class Password {
     private final String passwordHash;
 
     public Password(String unHashedPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
-        passwordHash = Password.generateStorngPasswordHash(unHashedPassword);
+        passwordHash = Password.generatePasswordHash(unHashedPassword);
     }
 
     public boolean verifyPassword(String unHashedPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
@@ -37,7 +37,7 @@ public class Password {
         return Objects.hash(passwordHash);
     }
 
-    private static String generateStorngPasswordHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
+    private static String generatePasswordHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
         int iterations = 1000;
         char[] chars = password.toCharArray();
         byte[] salt = getSalt();

@@ -5,8 +5,6 @@ import java.util.Random;
 
 public class ChatLobby {
 
-    private final int ID_LENGHT = 4;
-
     private static ChatLobby instance;
     private final HashMap<String, ChatRoom> chatRooms;
     private final Random random;
@@ -35,6 +33,7 @@ public class ChatLobby {
         String randomString;
         do {
             StringBuilder sb = new StringBuilder();
+            int ID_LENGHT = 4;
             for (int i = 0; i < ID_LENGHT; i++) {
                 sb.append(random.nextInt(10));
             }

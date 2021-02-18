@@ -5,11 +5,11 @@ import java.security.spec.InvalidKeySpecException;
 import java.util.Objects;
 
 public class User {
-    private String userName;
+    private final String userName;
 
 
-    private Password password;
-    private String colorCode;
+    private final Password password;
+    private final String colorCode;
 
     public User(String userName, Password password) {
         this(userName,password,null);
