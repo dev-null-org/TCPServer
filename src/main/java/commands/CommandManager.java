@@ -11,6 +11,7 @@ public class CommandManager {
         commands.add(new Help());
         commands.add(new Exit());
         commands.add(new Date());
+        commands.add(new Chat());
     }
 
     public static CommandManager getInstance() {
