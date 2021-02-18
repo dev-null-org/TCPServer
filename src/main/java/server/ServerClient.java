@@ -22,6 +22,10 @@ public class ServerClient implements Runnable, Closeable {
 
     private boolean closed;
 
+    public ServerClient(Socket socket, TCPServer server, boolean inQueue) {
+        initiateVariables(socket, server, inQueue);
+    }
+
     public void initiateVariables(Socket socket, TCPServer server, boolean inQueue) {
         this.closed = false;
         this.id = this.hashCode();
@@ -44,10 +48,6 @@ public class ServerClient implements Runnable, Closeable {
             close();
             e.printStackTrace();
         }
-    }
-
-    public ServerClient(Socket socket, TCPServer server, boolean inQueue) {
-        initiateVariables(socket, server, inQueue);
     }
 
     public int getId() {
@@ -91,14 +91,14 @@ public class ServerClient implements Runnable, Closeable {
     }
 
     public void println(String message) {
-        server.log("SERVER-CLIENT(" + id + ") printing: "+message);
+        server.log("SERVER-CLIENT(" + id + ") printing: " + message + "\u001B[0m");
         output.println(message);
     }
 
     public String readLine() {
         try {
-            String in=input.readLine();
-            server.log("SERVER-CLIENT(" + id + "): "+in);
+            String in = input.readLine();
+            server.log("SERVER-CLIENT(" + id + "): " + in + "\u001B[0m");
             return in;
         } catch (IOException e) {
             this.close();

@@ -7,16 +7,11 @@ import java.util.Objects;
 public class User {
     private final String userName;
 
-
     private final Password password;
     private final String colorCode;
 
     public User(String userName, Password password) {
-        this(userName,password,null);
-    }
-
-    public String getUserName() {
-        return userName;
+        this(userName, password, null);
     }
 
     public User(String userName, Password password, String colorCode) {
@@ -25,7 +20,11 @@ public class User {
         this.colorCode = colorCode;
     }
 
-    public boolean logIn(String password){
+    public String getUserName() {
+        return userName;
+    }
+
+    public boolean logIn(String password) {
         try {
             return this.password.verifyPassword(password);
         } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
@@ -36,9 +35,9 @@ public class User {
 
     @Override
     public String toString() {
-        if(colorCode!=null){
-            return colorCode+userName;
-        }else{
+        if (colorCode != null) {
+            return colorCode + userName;
+        } else {
             return userName;
         }
     }
