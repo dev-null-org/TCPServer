@@ -3,6 +3,7 @@ package commands;
 import chat.*;
 import server.ServerClient;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.regex.Pattern;
@@ -21,8 +22,14 @@ public class Chat implements Command {
 
     @Override
     public void execute(ServerClient client, String message) {
-        User user = getUser(client);
-        ChatRoom room = getChatRoom(client, user);
+        User user = null;
+        ChatRoom room = null;
+        try {
+            user = getUser(client);
+            room = getChatRoom(client, user);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
         if (user == null || room == null) {
             client.println("Exiting chat command.");
         } else {
@@ -31,7 +38,7 @@ public class Chat implements Command {
         }
     }
 
-    private ChatRoom getChatRoom(ServerClient client, User user) {
+    private ChatRoom getChatRoom(ServerClient client, User user) throws IOException {
         ChatLobby chatLobby = ChatLobby.getInstance();
         ChatRoom room = null;
         if (user != null) {
@@ -102,7 +109,7 @@ public class Chat implements Command {
         return room;
     }
 
-    private User getUser(ServerClient client) {
+    private User getUser(ServerClient client) throws IOException {
         UserDatabase database = UserDatabase.getInstance();
         boolean repeatLogin = true;
         String userName;

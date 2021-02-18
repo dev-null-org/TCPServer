@@ -76,8 +76,9 @@ public class ServerClient implements Runnable, Closeable {
         CommandManager commandManager = CommandManager.getInstance();
         while (!closed) {
             String inputString;
-            inputString = this.readLine();
-            if (inputString == null) {
+            try {
+                inputString = this.readLine();
+            } catch (IOException e) {
                 close();
                 break;
             }
@@ -100,15 +101,17 @@ public class ServerClient implements Runnable, Closeable {
         output.print(message);
     }
 
-    public String readLine() {
+    public String readLine() throws IOException {
+        IOException exception;
         try {
             String in = input.readLine();
             server.log("SERVER-CLIENT(" + id + "): " + in + "\u001B[0m");
             return in;
         } catch (IOException e) {
+            exception=e;
             this.close();
         }
-        return "";
+        throw exception;
     }
 
     @Override

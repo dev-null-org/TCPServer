@@ -1,5 +1,6 @@
 package chat;
 
+import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
 import java.util.Collections;
@@ -33,7 +34,6 @@ public class ChatRoom {
         for (ConnectedUser connectedUser : connectedUsers) {
             if (!connectedUser.user.equals(message.author)) {
                 connectedUser.client.println(message.toString() + connectedUser.user.getColorCode());
-
             }
         }
         this.messages.add(message);
@@ -63,14 +63,19 @@ public class ChatRoom {
         connectedUsers.add(connectedUser);
         connectedUser.client.println("Welcome to chat room to quit write Q any time" + connectedUser.user.getColorCode());
         while (true) {
-            String input = connectedUser.client.readLine();
+            String input;
+            try {
+                input = connectedUser.client.readLine();
+            } catch (IOException e) {
+                break;
+            }
             if (input == null || input.trim().equalsIgnoreCase("Q")) {
                 break;
             } else {
                 sendMessage(new Message(connectedUser.user, input));
             }
         }
-        connectedUser.client.println("Leaving chat room and chat command");
+        connectedUser.client.println("\u001B[0mLeaving chat room and chat command");
         connectedUsers.remove(connectedUser);
     }
 }
