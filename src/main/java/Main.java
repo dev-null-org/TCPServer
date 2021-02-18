@@ -1,4 +1,4 @@
-import config.ConfigManager;
+import utils.ConfigManager;
 import server.TCPServer;
 
 public class Main {
