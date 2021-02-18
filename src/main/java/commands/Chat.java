@@ -144,31 +144,39 @@ public class Chat implements Command {
                         client.println("What is your password?");
                         String password = client.readLine();
                         try {
-                            String color;
-                            client.println("What color do you want to be red(R),green(G),yellow(Y),blue(B),purple(P),cyan(C),white(W)");
-                            switch (client.readLine().trim().toUpperCase()) {
-                                case "R":
-                                    color = "\u001B[31m";
-                                    break;
-                                case "G":
-                                    color = "\u001B[32m";
-                                    break;
-                                case "Y":
-                                    color = "\u001B[33m";
-                                    break;
-                                case "B":
-                                    color = "\u001B[34m";
-                                    break;
-                                case "P":
-                                    color = "\u001B[35m";
-                                    break;
-                                case "C":
-                                    color = "\u001B[36m";
-                                    break;
-                                default:
-                                    color = "\u001B[37m";
-                                    break;
+                            String color = "\u001B[37m";
+                            boolean repeatColorPick = true;
+                            while (repeatColorPick) {
+                                client.println("What color do you want to be red(R),green(G),yellow(Y),blue(B),purple(P),cyan(C),white(W)");
+                                switch (client.readLine().trim().toUpperCase()) {
+                                    case "R":
+                                        color = "\u001B[31m";
+                                        break;
+                                    case "G":
+                                        color = "\u001B[32m";
+                                        break;
+                                    case "Y":
+                                        color = "\u001B[33m";
+                                        break;
+                                    case "B":
+                                        color = "\u001B[34m";
+                                        break;
+                                    case "P":
+                                        color = "\u001B[35m";
+                                        break;
+                                    case "C":
+                                        color = "\u001B[36m";
+                                        break;
+                                    default:
+                                        color = "\u001B[37m";
+                                        break;
+                                }
+                                client.println("Your color will look like this (" + color + userName + ":example\u001B[0m) do you want to change your color(Y/N)?");
+                                if (!client.readLine().trim().equalsIgnoreCase("Y")) {
+                                    repeatColorPick = false;
+                                }
                             }
+
                             user = new User(userName, new Password(password), color);
                             if (database.addUser(user)) {
                                 client.println("Successfully created account. Welcome!");
