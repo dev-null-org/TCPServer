@@ -10,31 +10,10 @@ import java.util.Objects;
 
 public class Password {
 
-    public String getPasswordHash() {
-        return passwordHash;
-    }
-
     private final String passwordHash;
 
     public Password(String unHashedPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
         passwordHash = Password.generatePasswordHash(unHashedPassword);
-    }
-
-    public boolean verifyPassword(String unHashedPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
-        return Password.validatePassword(unHashedPassword, passwordHash);
-    }
-
-    @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        Password password = (Password) o;
-        return passwordHash.equals(password.passwordHash);
-    }
-
-    @Override
-    public int hashCode() {
-        return Objects.hash(passwordHash);
     }
 
     private static String generatePasswordHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
@@ -88,6 +67,27 @@ public class Password {
             bytes[i] = (byte) Integer.parseInt(hex.substring(2 * i, 2 * i + 2), 16);
         }
         return bytes;
+    }
+
+    public String getPasswordHash() {
+        return passwordHash;
+    }
+
+    public boolean verifyPassword(String unHashedPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        return Password.validatePassword(unHashedPassword, passwordHash);
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Password password = (Password) o;
+        return passwordHash.equals(password.passwordHash);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(passwordHash);
     }
 
 }
