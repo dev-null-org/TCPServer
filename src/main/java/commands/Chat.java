@@ -5,7 +5,6 @@ import server.ServerClient;
 
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
-import java.util.Random;
 import java.util.regex.Pattern;
 
 public class Chat implements Command {
@@ -145,17 +144,32 @@ public class Chat implements Command {
                         client.println("What is your password?");
                         String password = client.readLine();
                         try {
-                            String[] color = new String[]{
-                                    "\u001B[30m",
-                                    "\u001B[31m",
-                                    "\u001B[32m",
-                                    "\u001B[33m",
-                                    "\u001B[34m",
-                                    "\u001B[35m",
-                                    "\u001B[36m",
-                                    "\u001B[37m"};
-                            Random random = new Random();
-                            user = new User(userName, new Password(password), color[random.nextInt(color.length)]);
+                            String color;
+                            client.println("What color do you want to be red(R),green(G),yellow(Y),blue(B),purple(P),cyan(C),white(W)");
+                            switch (client.readLine().trim().toUpperCase()) {
+                                case "R":
+                                    color = "\u001B[31m";
+                                    break;
+                                case "G":
+                                    color = "\u001B[32m";
+                                    break;
+                                case "Y":
+                                    color = "\u001B[33m";
+                                    break;
+                                case "B":
+                                    color = "\u001B[34m";
+                                    break;
+                                case "P":
+                                    color = "\u001B[35m";
+                                    break;
+                                case "C":
+                                    color = "\u001B[36m";
+                                    break;
+                                default:
+                                    color = "\u001B[37m";
+                                    break;
+                            }
+                            user = new User(userName, new Password(password), color);
                             if (database.addUser(user)) {
                                 client.println("Successfully created account. Welcome!");
                                 repeatLogin = false;
