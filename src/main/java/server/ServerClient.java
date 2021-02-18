@@ -95,6 +95,11 @@ public class ServerClient implements Runnable, Closeable {
         output.println(message);
     }
 
+    public void print(String message) {
+        server.log("SERVER-CLIENT(" + id + ") printing: " + message + "\u001B[0m");
+        output.print(message);
+    }
+
     public String readLine() {
         try {
             String in = input.readLine();
