@@ -6,7 +6,6 @@ import java.util.Objects;
 
 public class User {
     private final String userName;
-
     private final Password password;
     private final String colorCode;
 
@@ -48,6 +47,11 @@ public class User {
         if (o == null || getClass() != o.getClass()) return false;
         User user = (User) o;
         return Objects.equals(userName, user.userName);
+    }
+
+
+    public String getColorCode() {
+        return colorCode != null ? colorCode : "";
     }
 
     @Override
