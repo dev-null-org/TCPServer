@@ -21,7 +21,7 @@ public class Chat implements Command {
     }
 
     @Override
-    public ExecutionCode execute(ServerClient client, String message) {
+    public void execute(ServerClient client, String message) {
         User user=getUser(client);
         ChatRoom room=getChatRoom(client,user);
         if(user ==null||room==null){
@@ -30,7 +30,6 @@ public class Chat implements Command {
             ConnectedUser connectedUser=new ConnectedUser(client, user);
             room.joinChatRoom(connectedUser);
         }
-        return ExecutionCode.SUCCESS;
     }
 
     private ChatRoom getChatRoom(ServerClient client,User user){

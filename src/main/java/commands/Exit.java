@@ -16,8 +16,7 @@ public class Exit implements Command {
     }
 
     @Override
-    public ExecutionCode execute(ServerClient client, String message) {
+    public void execute(ServerClient client, String message) {
         client.close();
-        return ExecutionCode.SUCCESS;
     }
 }

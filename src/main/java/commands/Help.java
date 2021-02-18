@@ -16,13 +16,12 @@ public class Help implements Command {
     }
 
     @Override
-    public ExecutionCode execute(ServerClient client, String message) {
+    public void execute(ServerClient client, String message) {
         StringBuilder stringBuilder = new StringBuilder();
         for (Command command : CommandManager.getInstance().commands()) {
             stringBuilder.append("Command: ").append(command.commandName()).append("\r\n");
         }
         stringBuilder.deleteCharAt(stringBuilder.length() - 1);
         client.println(stringBuilder.toString());
-        return ExecutionCode.SUCCESS;
     }
 }

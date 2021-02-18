@@ -17,8 +17,7 @@ public class Date implements Command {
     }
 
     @Override
-    public ExecutionCode execute(ServerClient client, String message) {
+    public void execute(ServerClient client, String message) {
         client.println(new java.util.Date().toString());
-        return ExecutionCode.SUCCESS;
     }
 }

@@ -9,5 +9,5 @@ public interface Command {
 
     String commandName();
 
-    ExecutionCode execute(ServerClient client, String message);
+    void execute(ServerClient client, String message);
 }
