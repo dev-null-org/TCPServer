@@ -42,6 +42,10 @@ public class TCPServer implements Runnable, Closeable {
         this(portNumber, maxNumberOfClients, 100, 50, false);
     }
 
+    public TCPServer(int portNumber, int maxNumberOfClients, boolean logging) throws IOException {
+        this(portNumber, maxNumberOfClients, 100, 50, logging);
+    }
+
     @Override
     public void run() {
         while (true) {
