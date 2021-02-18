@@ -1,0 +1,5 @@
+{
+  "portNumber": 666,
+  "maxNumberOfClients": 5,
+  "logging": true
+}
