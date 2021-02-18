@@ -32,7 +32,8 @@ public class ChatRoom {
     public void sendMessage(Message message) {
         for (ConnectedUser connectedUser : connectedUsers) {
             if (!connectedUser.user.equals(message.author)) {
-                connectedUser.client.println(message.toString());
+                connectedUser.client.println(message.toString() + connectedUser.user.getColorCode());
+
             }
         }
         this.messages.add(message);
@@ -60,10 +61,10 @@ public class ChatRoom {
             connectedUser.client.println(message.toString());
         }
         connectedUsers.add(connectedUser);
-        connectedUser.client.println("Welcome to chat room to quit write Q any time");
+        connectedUser.client.println("Welcome to chat room to quit write Q any time" + connectedUser.user.getColorCode());
         while (true) {
             String input = connectedUser.client.readLine();
-            if (input != null && input.trim().equalsIgnoreCase("Q")) {
+            if (input == null || input.trim().equalsIgnoreCase("Q")) {
                 break;
             } else {
                 sendMessage(new Message(connectedUser.user, input));
