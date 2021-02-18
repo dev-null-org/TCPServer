@@ -11,6 +11,6 @@ public class Message {
 
     @Override
     public String toString() {
-        return author.toString() +":" + content;
+        return author.toString() +":" + content+"\u001B[0m";
     }
 }
