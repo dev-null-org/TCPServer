@@ -7,20 +7,17 @@ import java.util.LinkedList;
 import java.util.List;
 
 public class ChatRoom {
+
     private final String id;
     private final List<Message> messages;
-    private Password password;
     private final List<ConnectedUser> connectedUsers;
-
-    public String getId() {
-        return id;
-    }
+    private Password password;
 
     public ChatRoom() {
         this.id = ChatLobby.getInstance().randomId();
         this.messages = Collections.synchronizedList(new LinkedList<>());
         ChatLobby.getInstance().addRoom(this);
-        connectedUsers=Collections.synchronizedList(new LinkedList<>());
+        connectedUsers = Collections.synchronizedList(new LinkedList<>());
     }
 
     public ChatRoom(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
@@ -28,9 +25,13 @@ public class ChatRoom {
         this.password = new Password(password);
     }
 
+    public String getId() {
+        return id;
+    }
+
     public void sendMessage(Message message) {
-        for (ConnectedUser connectedUser:connectedUsers){
-            if(!connectedUser.user.equals(message.author)){
+        for (ConnectedUser connectedUser : connectedUsers) {
+            if (!connectedUser.user.equals(message.author)) {
                 connectedUser.client.println(message.toString());
             }
         }
@@ -54,18 +55,18 @@ public class ChatRoom {
         }
     }
 
-    public void joinChatRoom(ConnectedUser connectedUser){
-        for(Message message:messages){
+    public void joinChatRoom(ConnectedUser connectedUser) {
+        for (Message message : messages) {
             connectedUser.client.println(message.toString());
         }
         connectedUsers.add(connectedUser);
         connectedUser.client.println("Welcome to chat room to quit write Q any time");
-        while (true){
-            String input=connectedUser.client.readLine();
-            if(input.trim().equalsIgnoreCase("Q")){
+        while (true) {
+            String input = connectedUser.client.readLine();
+            if (input != null && input.trim().equalsIgnoreCase("Q")) {
                 break;
-            }else{
-                sendMessage(new Message(connectedUser.user,input));
+            } else {
+                sendMessage(new Message(connectedUser.user, input));
             }
         }
         connectedUser.client.println("Leaving chat room and chat command");
