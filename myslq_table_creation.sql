@@ -44,7 +44,6 @@ CREATE TABLE IF NOT EXISTS `tcp_server`.`Message` (
     REFERENCES `tcp_server`.`User` (`id`))
 ENGINE = InnoDB;
 
-
 -- -----------------------------------------------------
 -- Table `tcp_server`.`ChatRoom`
 -- -----------------------------------------------------
@@ -52,7 +51,7 @@ DROP TABLE IF EXISTS `tcp_server`.`ChatRoom` ;
 
 CREATE TABLE IF NOT EXISTS `tcp_server`.`ChatRoom` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `roomId` VARCHAR(45) NULL,
+  `roomId` VARCHAR(45) NULL UNIQUE,
   `password` VARCHAR(256) NULL,
   PRIMARY KEY (`id`))
 ENGINE = InnoDB;
