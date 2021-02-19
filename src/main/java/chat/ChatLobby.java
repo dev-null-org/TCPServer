@@ -1,5 +1,6 @@
 package chat;
 
+import utils.ConfigManager;
 import utils.DatabaseConnector;
 
 import java.security.NoSuchAlgorithmException;
@@ -52,10 +53,7 @@ public class ChatLobby {
                 ChatRoom room = new ChatRoom(roomId, password,roomMessages);
                 chatRooms.put(room.getId(), room);
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            // Can not happen because of the the parameter hashed being always true
+        } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
@@ -97,6 +95,13 @@ public class ChatLobby {
         do {
             StringBuilder sb = new StringBuilder();
             int ID_LENGTH = 4;
+            ConfigManager configManager=ConfigManager.getInstance();
+            if(configManager.configFileLoaded()){
+                Object value = configManager.getProperty("roomIdLength");
+                if(value instanceof Long){
+                    ID_LENGTH=((Long) value).intValue();
+                }
+            }
             for (int i = 0; i < ID_LENGTH; i++) {
                 sb.append(random.nextInt(10));
             }

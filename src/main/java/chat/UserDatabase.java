@@ -32,10 +32,7 @@ public class UserDatabase {
                 users.put(user.getUserName(), user);
             }
 
-        } catch (SQLException e) {
-            e.printStackTrace();
-        } catch (InvalidKeySpecException | NoSuchAlgorithmException e) {
-            // Can not happen because of the the parameter hashed being always true
+        } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
     }
