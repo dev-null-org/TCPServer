@@ -35,7 +35,7 @@ public class ChatLobby {
                 LinkedList<Message> roomMessages=new LinkedList<>();
                 //language=MariaDB
                 String messagesQuery = "select User.userName as userName,Message.content as content from Messages inner join Message on Messages.Message_id = Message.id " +
-                        "inner join User on Message.author = User.id where ChatRoom_id=? ";
+                        "inner join User on Message.author = User.id where ChatRoom_id=? order by Messages.id";
                 try (PreparedStatement messagesStatement = connection.prepareStatement(messagesQuery)) {
                     messagesStatement.setInt(1, id);
                     ResultSet messagesResult = messagesStatement.executeQuery();
