@@ -13,28 +13,27 @@ import java.util.List;
 public class ChatRoom {
 
     private final String id;
-    private final List<Message> messages;
     private final List<ConnectedUser> connectedUsers;
+    private List<Message> messages;
     private Password password;
 
     public ChatRoom() {
         this.id = ChatLobby.getInstance().randomId();
-        this.messages = Collections.synchronizedList(new LinkedList<>());
         this.connectedUsers = Collections.synchronizedList(new LinkedList<>());
+        this.messages = Collections.synchronizedList(new LinkedList<>());
         ChatLobby.getInstance().addRoom(this);
     }
 
     public ChatRoom(String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
         this.id = ChatLobby.getInstance().randomId();
-        this.messages = Collections.synchronizedList(new LinkedList<>());
         this.connectedUsers = Collections.synchronizedList(new LinkedList<>());
         this.password = new Password(password);
+        this.messages = Collections.synchronizedList(new LinkedList<>());
         ChatLobby.getInstance().addRoom(this);
     }
 
-    protected ChatRoom(String id, String password, LinkedList<Message> messages) throws InvalidKeySpecException, NoSuchAlgorithmException {
+    protected ChatRoom(String id, String password) throws InvalidKeySpecException, NoSuchAlgorithmException {
         this.id = id;
-        this.messages = Collections.synchronizedList(messages);
         this.connectedUsers = Collections.synchronizedList(new LinkedList<>());
         if (password != null) {
             this.password = new Password(password, true);
@@ -80,7 +79,7 @@ public class ChatRoom {
                 } catch (SQLException e) {
                     e.printStackTrace();
                 }
-            }else{
+            } else {
                 System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO MESSAGES!!");
             }
         } catch (SQLException e) {
@@ -107,12 +106,40 @@ public class ChatRoom {
     }
 
     public void joinChatRoom(ConnectedUser connectedUser) {
+        UserDatabase userDatabase = UserDatabase.getInstance();
+        Connection connection = DatabaseConnector.getInstance().getConnection();
+        if (messages == null && connection != null) {
+            connectedUser.client.println("Loading messages from database please wait");
+            LinkedList<Message> roomMessages = new LinkedList<>();
+            //language=MariaDB
+            String messagesQuery = "select User.userName as userName,Message.content as content from Messages inner join Message on Messages.Message_id = Message.id " +
+                    "inner join User on Message.author = User.id inner join ChatRoom on Messages.ChatRoom_id = ChatRoom.id where ChatRoom.roomId=? order by Messages.id";
+            try (PreparedStatement messagesStatement = connection.prepareStatement(messagesQuery)) {
+                messagesStatement.setString(1, id);
+                ResultSet messagesResult = messagesStatement.executeQuery();
+                while (messagesResult.next()) {
+                    String userName = messagesResult.getString("userName");
+                    String content = messagesResult.getString("content");
+                    User author = userDatabase.getUser(userName);
+                    Message message = new Message(author, content);
+                    roomMessages.add(message);
+                }
+                messagesResult.close();
+
+                connectedUser.client.println("Messages loaded");
+            } catch (SQLException e) {
+                e.printStackTrace();
+            }
+            this.messages = Collections.synchronizedList(roomMessages);
+        } else {
+            this.messages = Collections.synchronizedList(new LinkedList<>());
+        }
         for (Message message : messages) {
             connectedUser.client.println(message.toString());
         }
-        for (ConnectedUser user:connectedUsers){
-            user.client.println(connectedUser.user.toString()+"\u001B[0m has joined");
-            connectedUser.client.println(user.user.toString()+"\u001B[0m is online");
+        for (ConnectedUser user : connectedUsers) {
+            user.client.println(connectedUser.user.toString() + "\u001B[0m has joined");
+            connectedUser.client.println(user.user.toString() + "\u001B[0m is online");
         }
         connectedUsers.add(connectedUser);
         connectedUser.client.println("Welcome to chat room to quit write Q any time" + connectedUser.user.getColorCode());
@@ -132,8 +159,8 @@ public class ChatRoom {
         connectedUser.client.println("\u001B[0mLeaving chat room and chat command");
         connectedUsers.remove(connectedUser);
 
-        for (ConnectedUser user:connectedUsers){
-            user.client.println(connectedUser.user.toString()+"\u001B[0m has left"+user.user.getColorCode());
+        for (ConnectedUser user : connectedUsers) {
+            user.client.println(connectedUser.user.toString() + "\u001B[0m has left" + user.user.getColorCode());
         }
     }
 
