@@ -136,4 +136,12 @@ public class ChatRoom {
             user.client.println(connectedUser.user.toString()+"\u001B[0m has left"+user.user.getColorCode());
         }
     }
+
+    public List<ConnectedUser> getConnectedUsers() {
+        if (isLocked()) {
+            return null;
+        } else {
+            return new LinkedList<>(this.connectedUsers);
+        }
+    }
 }

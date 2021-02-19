@@ -6,6 +6,8 @@ import server.ServerClient;
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
 import java.security.spec.InvalidKeySpecException;
+import java.util.Collection;
+import java.util.List;
 import java.util.regex.Pattern;
 
 public class Chat implements Command {
@@ -44,7 +46,7 @@ public class Chat implements Command {
         if (user != null) {
             boolean repeatRoomJoin = true;
             while (repeatRoomJoin) {
-                client.println("Do you want to create new room(C), join exist one(J) or exit(Q)?");
+                client.println("Do you want to create new room(C), join exist one(J), list existing(L) or exit(Q)?");
                 String input = client.readLine();
                 switch (input.trim().toUpperCase()) {
                     case "C":
@@ -96,6 +98,26 @@ public class Chat implements Command {
                             }
                         } else {
                             client.println("Room with that ID is not existing");
+                        }
+                        break;
+                    case "L":
+                        Collection<ChatRoom> chatRooms = chatLobby.getAllRooms();
+                        if (chatRooms.size() == 0) {
+                            client.println("No active rooms found :(");
+                        } else {
+                            for (ChatRoom roomInDatabase : chatRooms) {
+                                if (roomInDatabase.isLocked()) {
+                                    client.println("Room ID is " + roomInDatabase.getId() + ", but it's locked");
+                                } else {
+                                    List<ConnectedUser> users = roomInDatabase.getConnectedUsers();
+                                    client.println("Room ID is " + roomInDatabase.getId() + (users.size() > 0 ? ", and those members are online" : ", but no one is there :("));
+                                    if (users.size() > 0) {
+                                        for (ConnectedUser activeUser : roomInDatabase.getConnectedUsers()) {
+                                            client.println("\t" + activeUser.getUser().toString() + "\u001B[0m");
+                                        }
+                                    }
+                                }
+                            }
                         }
                         break;
                     case "Q":
