@@ -4,10 +4,10 @@ import org.json.simple.JSONObject;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import java.io.File;
-import java.io.FileReader;
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.net.URL;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 
 public class ConfigManager {
     private static ConfigManager instance;
@@ -17,17 +17,14 @@ public class ConfigManager {
     private ConfigManager() {
         JSONObject data = null;
         ClassLoader classLoader = getClass().getClassLoader();
-        URL url = classLoader.getResource("config.json");
-        if (url != null) {
-            File configFile = new File(url.getFile());
-            System.out.println(configFile);
-            if (configFile.exists()) {
-                JSONParser parser = new JSONParser();
-                try {
-                    data = (JSONObject) parser.parse(new FileReader(configFile));
-                } catch (IOException | ParseException e) {
-                    e.printStackTrace();
-                }
+        InputStream inputStream = classLoader.getResourceAsStream("config.json");
+
+        if (inputStream != null) {
+            JSONParser parser = new JSONParser();
+            try {
+                data = (JSONObject) parser.parse(new BufferedReader(new InputStreamReader(inputStream)));
+            } catch (IOException | ParseException e) {
+                e.printStackTrace();
             }
         }
         configData = data;
