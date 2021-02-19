@@ -82,6 +82,10 @@ public class ServerClient implements Runnable, Closeable {
                 close();
                 break;
             }
+            if(inputString==null){
+                this.close();
+                return;
+            }
             Command command = commandManager.getCommand(inputString);
             if (command != null) {
                 command.execute(this, inputString);
