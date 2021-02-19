@@ -111,8 +111,8 @@ public class ChatRoom {
             connectedUser.client.println(message.toString());
         }
         for (ConnectedUser user:connectedUsers){
-            user.client.println(connectedUser.user.toString()+"\u001B[0m has joined"+user.user.getColorCode());
-            connectedUser.client.println(user.user.toString()+"\u001B[0m is online"+user.user.getColorCode());
+            user.client.println(connectedUser.user.toString()+"\u001B[0m has joined");
+            connectedUser.client.println(user.user.toString()+"\u001B[0m is online");
         }
         connectedUsers.add(connectedUser);
         connectedUser.client.println("Welcome to chat room to quit write Q any time" + connectedUser.user.getColorCode());
