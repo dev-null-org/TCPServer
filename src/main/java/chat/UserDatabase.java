@@ -22,18 +22,20 @@ public class UserDatabase {
         //language=MariaDB
         String query = "select colorCode,password,userName from tcp_server.User;";
         Connection connection = DatabaseConnector.getInstance().getConnection();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-            while (resultSet.next()) {
-                String colorCode = resultSet.getString("colorCode");
-                String password = resultSet.getString("password");
-                String userName = resultSet.getString("userName");
-                User user = new User(userName, new Password(password, true), colorCode);
-                users.put(user.getUserName(), user);
-            }
+        if(connection!=null) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String colorCode = resultSet.getString("colorCode");
+                    String password = resultSet.getString("password");
+                    String userName = resultSet.getString("userName");
+                    User user = new User(userName, new Password(password, true), colorCode);
+                    users.put(user.getUserName(), user);
+                }
 
-        } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
+            } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
+            }
         }
     }
 
@@ -51,16 +53,18 @@ public class UserDatabase {
         //language=MariaDB
         String query = "insert into tcp_server.User(colorCode, password, userName) values(?,?,?)";
         Connection connection = DatabaseConnector.getInstance().getConnection();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, user.getColorCode());
-            preparedStatement.setString(2, user.getPassword().getPasswordHash());
-            preparedStatement.setString(3, user.getUserName());
-            int result = preparedStatement.executeUpdate();
-            if (result == 0) {
-                System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO USERS!!");
+        if (connection != null) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, user.getColorCode());
+                preparedStatement.setString(2, user.getPassword().getPasswordHash());
+                preparedStatement.setString(3, user.getUserName());
+                int result = preparedStatement.executeUpdate();
+                if (result == 0) {
+                    System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO USERS!!");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         users.put(user.getUserName(), user);
         return true;

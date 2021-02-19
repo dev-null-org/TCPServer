@@ -21,16 +21,18 @@ public class ChatLobby {
         //language=MariaDB
         String query = "select roomId,password from tcp_server.ChatRoom";
         Connection connection = DatabaseConnector.getInstance().getConnection();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query);
-             ResultSet resultSet = preparedStatement.executeQuery()) {
-            while (resultSet.next()) {
-                String roomId = resultSet.getString("roomId");
-                String password = resultSet.getString("password");
-                ChatRoom room = new ChatRoom(roomId, password);
-                chatRooms.put(room.getId(), room);
+        if (connection != null) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query);
+                 ResultSet resultSet = preparedStatement.executeQuery()) {
+                while (resultSet.next()) {
+                    String roomId = resultSet.getString("roomId");
+                    String password = resultSet.getString("password");
+                    ChatRoom room = new ChatRoom(roomId, password);
+                    chatRooms.put(room.getId(), room);
+                }
+            } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException | InvalidKeySpecException | NoSuchAlgorithmException e) {
-            e.printStackTrace();
         }
     }
 
@@ -50,19 +52,21 @@ public class ChatLobby {
         //language=MariaDB
         String query = "insert into tcp_server.ChatRoom(roomId, password) values(?,?)";
         Connection connection = DatabaseConnector.getInstance().getConnection();
-        try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
-            preparedStatement.setString(1, chatRoom.getId());
-            if (chatRoom.isLocked()) {
-                preparedStatement.setString(2, chatRoom.getPassword().getPasswordHash());
-            } else {
-                preparedStatement.setNull(2, Types.VARCHAR);
+        if (connection != null) {
+            try (PreparedStatement preparedStatement = connection.prepareStatement(query)) {
+                preparedStatement.setString(1, chatRoom.getId());
+                if (chatRoom.isLocked()) {
+                    preparedStatement.setString(2, chatRoom.getPassword().getPasswordHash());
+                } else {
+                    preparedStatement.setNull(2, Types.VARCHAR);
+                }
+                int result = preparedStatement.executeUpdate();
+                if (result == 0) {
+                    System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO CHAT ROOMS!!");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-            int result = preparedStatement.executeUpdate();
-            if (result == 0) {
-                System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO CHAT ROOMS!!");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
     }
 
@@ -71,11 +75,11 @@ public class ChatLobby {
         do {
             StringBuilder sb = new StringBuilder();
             int ID_LENGTH = 4;
-            ConfigManager configManager=ConfigManager.getInstance();
-            if(configManager.configFileLoaded()){
+            ConfigManager configManager = ConfigManager.getInstance();
+            if (configManager.configFileLoaded()) {
                 Object value = configManager.getProperty("roomIdLength");
-                if(value instanceof Long){
-                    ID_LENGTH=((Long) value).intValue();
+                if (value instanceof Long) {
+                    ID_LENGTH = ((Long) value).intValue();
                 }
             }
             for (int i = 0; i < ID_LENGTH; i++) {
@@ -86,7 +90,7 @@ public class ChatLobby {
         return randomString;
     }
 
-    public Collection<ChatRoom> getAllRooms(){
+    public Collection<ChatRoom> getAllRooms() {
         return this.chatRooms.values();
     }
 

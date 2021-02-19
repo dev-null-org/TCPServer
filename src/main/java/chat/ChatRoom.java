@@ -57,33 +57,35 @@ public class ChatRoom {
         //language=MariaDB
         String messageQuery = "insert into Message(content, author) values(?,(select User.id from User where userName=?))";
         Connection connection = DatabaseConnector.getInstance().getConnection();
-        try (PreparedStatement messageStatement = connection.prepareStatement(messageQuery, Statement.RETURN_GENERATED_KEYS)) {
-            messageStatement.setString(1, message.getContent());
-            messageStatement.setString(2, message.getAuthor().getUserName());
-            int result = messageStatement.executeUpdate();
-            if (result == 0) {
-                System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO CHAT MESSAGE!!");
-            }
-            ResultSet resultSet = messageStatement.getGeneratedKeys();
-            if (resultSet.next()) {
-                int id = resultSet.getInt(1);
-                //language=MariaDB
-                String messagesQuery = "insert into Messages(Message_id, ChatRoom_id) values (?,(select ChatRoom.id from ChatRoom where roomId=?))";
-                try (PreparedStatement messagesStatement = connection.prepareStatement(messagesQuery)) {
-                    messagesStatement.setInt(1, id);
-                    messagesStatement.setString(2, this.id);
-                    result = messagesStatement.executeUpdate();
-                    if (result == 0) {
-                        System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO CHAT MESSAGES!!");
-                    }
-                } catch (SQLException e) {
-                    e.printStackTrace();
+        if (connection != null) {
+            try (PreparedStatement messageStatement = connection.prepareStatement(messageQuery, Statement.RETURN_GENERATED_KEYS)) {
+                messageStatement.setString(1, message.getContent());
+                messageStatement.setString(2, message.getAuthor().getUserName());
+                int result = messageStatement.executeUpdate();
+                if (result == 0) {
+                    System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO CHAT MESSAGE!!");
                 }
-            } else {
-                System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO MESSAGES!!");
+                ResultSet resultSet = messageStatement.getGeneratedKeys();
+                if (resultSet.next()) {
+                    int id = resultSet.getInt(1);
+                    //language=MariaDB
+                    String messagesQuery = "insert into Messages(Message_id, ChatRoom_id) values (?,(select ChatRoom.id from ChatRoom where roomId=?))";
+                    try (PreparedStatement messagesStatement = connection.prepareStatement(messagesQuery)) {
+                        messagesStatement.setInt(1, id);
+                        messagesStatement.setString(2, this.id);
+                        result = messagesStatement.executeUpdate();
+                        if (result == 0) {
+                            System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO CHAT MESSAGES!!");
+                        }
+                    } catch (SQLException e) {
+                        e.printStackTrace();
+                    }
+                } else {
+                    System.out.println("SOMETHING WENT WRONG WHEN INSERTING INTO MESSAGES!!");
+                }
+            } catch (SQLException e) {
+                e.printStackTrace();
             }
-        } catch (SQLException e) {
-            e.printStackTrace();
         }
         this.messages.add(message);
     }
