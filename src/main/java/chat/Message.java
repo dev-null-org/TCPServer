@@ -11,6 +11,14 @@ public class Message {
 
     @Override
     public String toString() {
-        return author.toString() +":" + content+"\u001B[0m";
+        return author.toString() + ":" + content + "\u001B[0m";
+    }
+
+    public User getAuthor() {
+        return author;
+    }
+
+    public String getContent() {
+        return content;
     }
 }

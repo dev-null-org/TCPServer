@@ -1,5 +1,8 @@
 {
   "portNumber": 666,
   "maxNumberOfClients": 5,
-  "logging": true
+  "logging": true,
+  "databaseAddress": "jdbc:mysql://debianserver.cz:3306/tcp_server?useSSL=false&autoReconnect=true",
+  "databaseUser": "tcp_server_user",
+  "databasePassword": "MjU3NTEwNjIxNm"
 }

@@ -19,6 +19,10 @@ public class User {
         this.colorCode = colorCode;
     }
 
+    public Password getPassword() {
+        return password;
+    }
+
     public String getUserName() {
         return userName;
     }

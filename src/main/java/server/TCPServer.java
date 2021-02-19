@@ -15,6 +15,7 @@ public class TCPServer implements Runnable, Closeable {
     private final int maxQueue;
 
     private final ServerSocket serverSocket;
+
     private final LinkedList<ServerClient> clients;
     private final Queue<ServerClient> clientQueue;
 

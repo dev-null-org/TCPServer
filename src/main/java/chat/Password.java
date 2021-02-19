@@ -13,7 +13,15 @@ public class Password {
     private final String passwordHash;
 
     public Password(String unHashedPassword) throws InvalidKeySpecException, NoSuchAlgorithmException {
-        passwordHash = Password.generatePasswordHash(unHashedPassword);
+        this(unHashedPassword, false);
+    }
+
+    public Password(String password, boolean hashed) throws InvalidKeySpecException, NoSuchAlgorithmException {
+        if (hashed) {
+            this.passwordHash = password;
+        } else {
+            this.passwordHash = generatePasswordHash(password);
+        }
     }
 
     private static String generatePasswordHash(String password) throws NoSuchAlgorithmException, InvalidKeySpecException {
