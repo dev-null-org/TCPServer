@@ -35,7 +35,7 @@ DROP TABLE IF EXISTS `tcp_server`.`Message` ;
 
 CREATE TABLE IF NOT EXISTS `tcp_server`.`Message` (
   `id` INT NOT NULL AUTO_INCREMENT,
-  `content` VARCHAR(45) NULL,
+  `content` VARCHAR(512) NULL,
   `author` INT NOT NULL,
   PRIMARY KEY (`id`),
   INDEX `fk_Message_User1_idx` (`author` ASC),
