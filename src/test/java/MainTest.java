@@ -49,4 +49,10 @@ public class MainTest {
         Assertions.assertFalse(Assertions.assertDoesNotThrow(() -> password.verifyPassword("blablabl")));
         Assertions.assertFalse(Assertions.assertDoesNotThrow(() -> password.verifyPassword("blablablaa")));
     }
+
+    @Test
+    public void ignoreMePls(){
+        Assertions.assertFalse(false);
+        //just test;
+    }
 }
