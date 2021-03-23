@@ -110,31 +110,31 @@ public class ChatRoom {
     public void joinChatRoom(ConnectedUser connectedUser) {
         UserDatabase userDatabase = UserDatabase.getInstance();
         Connection connection = DatabaseConnector.getInstance().getConnection();
-        if (messages == null && connection != null) {
-            connectedUser.client.println("Loading messages from database please wait");
+        if (messages == null) {
             LinkedList<Message> roomMessages = new LinkedList<>();
-            //language=MariaDB
-            String messagesQuery = "select User.userName as userName,Message.content as content from Messages inner join Message on Messages.Message_id = Message.id " +
-                    "inner join User on Message.author = User.id inner join ChatRoom on Messages.ChatRoom_id = ChatRoom.id where ChatRoom.roomId=? order by Messages.id";
-            try (PreparedStatement messagesStatement = connection.prepareStatement(messagesQuery)) {
-                messagesStatement.setString(1, id);
-                ResultSet messagesResult = messagesStatement.executeQuery();
-                while (messagesResult.next()) {
-                    String userName = messagesResult.getString("userName");
-                    String content = messagesResult.getString("content");
-                    User author = userDatabase.getUser(userName);
-                    Message message = new Message(author, content);
-                    roomMessages.add(message);
-                }
-                messagesResult.close();
+            if (connection != null) {
+                connectedUser.client.println("Loading messages from database please wait");
+                //language=MariaDB
+                String messagesQuery = "select User.userName as userName,Message.content as content from Messages inner join Message on Messages.Message_id = Message.id " +
+                        "inner join User on Message.author = User.id inner join ChatRoom on Messages.ChatRoom_id = ChatRoom.id where ChatRoom.roomId=? order by Messages.id";
+                try (PreparedStatement messagesStatement = connection.prepareStatement(messagesQuery)) {
+                    messagesStatement.setString(1, id);
+                    ResultSet messagesResult = messagesStatement.executeQuery();
+                    while (messagesResult.next()) {
+                        String userName = messagesResult.getString("userName");
+                        String content = messagesResult.getString("content");
+                        User author = userDatabase.getUser(userName);
+                        Message message = new Message(author, content);
+                        roomMessages.add(message);
+                    }
+                    messagesResult.close();
 
-                connectedUser.client.println("Messages loaded");
-            } catch (SQLException e) {
-                e.printStackTrace();
+                    connectedUser.client.println("Messages loaded");
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
             }
             this.messages = Collections.synchronizedList(roomMessages);
-        } else {
-            this.messages = Collections.synchronizedList(new LinkedList<>());
         }
         for (Message message : messages) {
             connectedUser.client.println(message.toString());

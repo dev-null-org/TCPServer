@@ -1,5 +1,5 @@
 {
-  "portNumber": 666,
+  "portNumber": 6666,
   "maxNumberOfClients": 5,
   "logging": true,
   "roomIdLength": 2,
