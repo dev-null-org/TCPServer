@@ -1,7 +1,6 @@
 package commands;
 
 import chat.*;
-import server.ServerClient;
 
 import java.io.IOException;
 import java.security.NoSuchAlgorithmException;
@@ -23,7 +22,7 @@ public class Chat implements Command {
     }
 
     @Override
-    public void execute(ServerClient client, String message) {
+    public void execute(CommandServerClient client, String message) {
         User user = null;
         ChatRoom room = null;
         try {
@@ -40,7 +39,7 @@ public class Chat implements Command {
         }
     }
 
-    private ChatRoom getChatRoom(ServerClient client, User user) throws IOException {
+    private ChatRoom getChatRoom(CommandServerClient client, User user) throws IOException {
         ChatLobby chatLobby = ChatLobby.getInstance();
         ChatRoom room = null;
         if (user != null) {
@@ -131,7 +130,7 @@ public class Chat implements Command {
         return room;
     }
 
-    private User getUser(ServerClient client) throws IOException {
+    private User getUser(CommandServerClient client) throws IOException {
         UserDatabase database = UserDatabase.getInstance();
         boolean repeatLogin = true;
         String userName;

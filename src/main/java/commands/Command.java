@@ -1,7 +1,5 @@
 package commands;
 
-import server.ServerClient;
-
 import java.util.regex.Pattern;
 
 public interface Command {
@@ -9,5 +7,5 @@ public interface Command {
 
     String commandName();
 
-    void execute(ServerClient client, String message);
+    void execute(CommandServerClient client, String message);
 }

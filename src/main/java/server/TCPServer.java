@@ -1,5 +1,8 @@
 package server;
 
+import commands.CommandServerClientFactory;
+import utils.ColorManager;
+
 import java.io.Closeable;
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -7,6 +10,8 @@ import java.net.Socket;
 import java.util.ArrayDeque;
 import java.util.LinkedList;
 import java.util.Queue;
+
+import static utils.ColorManager.COLOR_COUNT;
 
 public class TCPServer implements Runnable, Closeable {
 
@@ -21,9 +26,11 @@ public class TCPServer implements Runnable, Closeable {
 
     private final LinkedList<ServerClient> usedClients;
 
+    private final ServerClientFactory factory;
     private final boolean logging;
+    private int colorCounter;
 
-    public TCPServer(int portNumber, int maxNumberOfClients, int maxNumberClientsInPool, int maxQueue, Boolean logging) throws IOException {
+    public TCPServer(int portNumber, int maxNumberOfClients, int maxNumberClientsInPool, int maxQueue, Boolean logging, ServerClientFactory factory) throws IOException {
         this.clientQueue = new ArrayDeque<>();
         this.clients = new LinkedList<>();
         this.usedClients = new LinkedList<>();
@@ -32,11 +39,16 @@ public class TCPServer implements Runnable, Closeable {
         this.maxNumberClientsInPool = maxNumberClientsInPool;
         this.maxQueue = maxQueue;
         this.logging = logging;
+        this.factory = factory;
+        this.colorCounter = (int) Math.floor(Math.random() * COLOR_COUNT());
+    }
 
+    public TCPServer(int portNumber, int maxNumberOfClients, int maxNumberClientsInPool, int maxQueue, boolean logging) throws IOException {
+        this(portNumber, maxNumberOfClients, maxNumberClientsInPool, maxQueue, logging, CommandServerClientFactory.factory);
     }
 
     public TCPServer(int portNumber, int maxNumberOfClients, int maxNumberClientsInPool, int maxQueue) throws IOException {
-        this(portNumber, maxNumberOfClients, maxNumberClientsInPool, maxQueue, false);
+        this(portNumber, maxNumberOfClients, maxNumberClientsInPool, maxQueue, false, CommandServerClientFactory.factory);
     }
 
     public TCPServer(int portNumber, int maxNumberOfClients) throws IOException {
@@ -65,7 +77,15 @@ public class TCPServer implements Runnable, Closeable {
     }
 
     private void connectNewClient(Socket socket) {
-        if (socket != null) {
+        if (socket == null) {
+            logError("SERVER: error null socket");
+            return;
+        }
+        if (socket.isClosed()) {
+            logError("SERVER: error socked is closed");
+            return;
+        }
+        synchronized (this) {
             if (clients.size() < maxNumberOfClients) {
                 ServerClient client = createServerClient(socket, this, false);
                 log("SERVER: NEW client connected (" + socket.getRemoteSocketAddress() + ")");
@@ -86,8 +106,6 @@ public class TCPServer implements Runnable, Closeable {
                     clientQueue.add(client);
                 }
             }
-        } else {
-            log("SERVER: error null socket");
         }
     }
 
@@ -96,10 +114,10 @@ public class TCPServer implements Runnable, Closeable {
         if (usedClients.size() > 0) {
             log("SERVER: NEW client from object pool");
             client = usedClients.removeFirst();
-            client.initiateVariables(socket, server, inQueue);
+            client.initiateVariables(socket, server, inQueue, ColorManager.getColor(colorCounter++));
         } else {
             log("SERVER: NEW client");
-            client = new ServerClient(socket, server, inQueue);
+            client = factory.create(socket, server, inQueue, ColorManager.getColor(colorCounter++));
         }
         return client;
     }
@@ -115,14 +133,23 @@ public class TCPServer implements Runnable, Closeable {
             clientThread.start();
         }
         if (usedClients.size() < maxNumberClientsInPool) {
-
-            usedClients.add(serverClient);
+            if (!usedClients.contains(serverClient)) {
+                usedClients.add(serverClient);
+            } else {
+                logError("SERVER: !!! Trying to add client back to pool twice !!!");
+            }
         }
     }
 
     public void log(String message) {
         if (logging) {
             System.out.println(message);
+        }
+    }
+
+    public void logError(String message) {
+        if (logging) {
+            System.err.println("\u001b[31;1m" + message + "\u001b[0m");
         }
     }
 

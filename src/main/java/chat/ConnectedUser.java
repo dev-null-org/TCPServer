@@ -1,17 +1,17 @@
 package chat;
 
-import server.ServerClient;
+import commands.CommandServerClient;
 
 public class ConnectedUser {
-    protected final ServerClient client;
+    protected final CommandServerClient client;
     protected final User user;
 
-    public ConnectedUser(ServerClient client, User user) {
+    public ConnectedUser(CommandServerClient client, User user) {
         this.client = client;
         this.user = user;
     }
 
-    public User getUser(){
+    public User getUser() {
         return user;
     }
 

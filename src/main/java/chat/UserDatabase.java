@@ -22,7 +22,7 @@ public class UserDatabase {
         //language=MariaDB
         String query = "select colorCode,password,userName from tcp_server.User;";
         Connection connection = DatabaseConnector.getInstance().getConnection();
-        if(connection!=null) {
+        if (connection != null) {
             try (PreparedStatement preparedStatement = connection.prepareStatement(query);
                  ResultSet resultSet = preparedStatement.executeQuery()) {
                 while (resultSet.next()) {

@@ -1,6 +1,4 @@
 import chat.Password;
-import chat.User;
-import chat.UserDatabase;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 import utils.ConfigManager;

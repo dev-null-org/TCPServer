@@ -1,134 +1,65 @@
 package server;
 
-import commands.Command;
-import commands.CommandManager;
+import utils.ColorManager;
 
-import java.io.*;
+import java.io.IOException;
 import java.net.Socket;
 import java.net.SocketAddress;
 
-public class ServerClient implements Runnable, Closeable {
-    private Socket socket;
-    private BufferedReader input;
-    private PrintWriter output;
+public abstract class ServerClient implements Runnable {
 
-    private int id;
-
+    protected TCPServer server;
+    protected boolean inQueue;
+    protected Socket socket;
+    protected boolean closed;
+    protected int id;
     private SocketAddress remoteIp;
+    private ColorManager.Color logColor;
 
-    private TCPServer server;
-
-    private boolean inQueue;
-
-    private boolean closed;
-
-    public ServerClient(Socket socket, TCPServer server, boolean inQueue) {
-        initiateVariables(socket, server, inQueue);
-    }
-
-    public void initiateVariables(Socket socket, TCPServer server, boolean inQueue) {
-        this.closed = false;
-        this.id = this.hashCode();
-        this.socket = socket;
-        this.server = server;
-        this.inQueue = inQueue;
-        try {
-            if (!inQueue) {
-                InputStreamReader reader = new InputStreamReader(socket.getInputStream());
-                input = new BufferedReader(reader);
-            }
-            output = new PrintWriter(socket.getOutputStream(), true);
-            remoteIp = socket.getRemoteSocketAddress();
-            if (inQueue) {
-                println("You are in QUEUE wait to get started");
-            } else {
-                println("Welcome you can now use commands");
-            }
-        } catch (IOException e) {
-            close();
-            e.printStackTrace();
-        }
+    public ServerClient(Socket socket, TCPServer server, boolean inQueue, ColorManager.Color logColor) {
+        this.initiateVariables(socket, server, inQueue, logColor);
     }
 
     public int getId() {
         return id;
     }
 
-    public SocketAddress remoteIpAddress() {
-        return remoteIp;
+    public void initiateVariables(Socket socket, TCPServer server, boolean inQueue, ColorManager.Color logColor) {
+        this.logColor = logColor;
+        this.closed = false;
+        this.id = this.hashCode();
+        this.socket = socket;
+        this.server = server;
+        this.inQueue = inQueue;
+        this.remoteIp = socket.getRemoteSocketAddress();
     }
 
-    @Override
-    public void run() {
-        if (inQueue) {
-            inQueue = false;
-            try {
-                long skippedNumberOfChars = socket.getInputStream().skip(socket.getInputStream().available());
-                server.log("SERVER-CLIENT(" + id + "): skipped " + skippedNumberOfChars + " client was in queue");
-                InputStreamReader reader = new InputStreamReader(socket.getInputStream());
-                input = new BufferedReader(reader);
-            } catch (IOException e) {
-                close();
-                e.printStackTrace();
-            }
-            println("Welcome you can now use commands");
-        }
-        CommandManager commandManager = CommandManager.getInstance();
-        while (!closed) {
-            String inputString;
-            try {
-                inputString = this.readLine();
-            } catch (IOException e) {
-                close();
-                break;
-            }
-            if(inputString==null){
-                this.close();
-                return;
-            }
-            Command command = commandManager.getCommand(inputString);
-            if (command != null) {
-                command.execute(this, inputString);
-            } else {
-                println("Unknown command: " + inputString + " use 'help' to see all command available");
-            }
-        }
+    public void logError(String error) {
+        server.logError(getIdentifier() + " ERROR: " + error + "\u001B[0m");
     }
 
-    public void println(String message) {
-        server.log("SERVER-CLIENT(" + id + ") printing: " + message + "\u001B[0m");
-        output.println(message);
+    public String getIdentifier() {
+        return logColor.toString() + "SERVER-CLIENT(" + id + ")";
     }
 
-    public void print(String message) {
-        server.log("SERVER-CLIENT(" + id + ") printing: " + message + "\u001B[0m");
-        output.print(message);
+    public void log(String message) {
+        server.log(getIdentifier() + " printing: " + message + "\u001B[0m");
     }
 
-    public String readLine() throws IOException {
-        IOException exception;
-        try {
-            String in = input.readLine();
-            server.log("SERVER-CLIENT(" + id + "): " + in + "\u001B[0m");
-            return in;
-        } catch (IOException e) {
-            exception=e;
-            this.close();
-        }
-        throw exception;
-    }
-
-    @Override
     public void close() {
-        closed = true;
         if (socket != null) {
             try {
-                println("Closing this connection bey.");
                 socket.close();
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        server.remove(this);
+        if (!closed) server.remove(this);
+        closed = true;
     }
+
+    public SocketAddress remoteIpAddress() {
+        return remoteIp;
+    }
+
 }

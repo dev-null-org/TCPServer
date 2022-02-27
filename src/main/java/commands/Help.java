@@ -1,7 +1,5 @@
 package commands;
 
-import server.ServerClient;
-
 import java.util.regex.Pattern;
 
 public class Help implements Command {
@@ -16,7 +14,7 @@ public class Help implements Command {
     }
 
     @Override
-    public void execute(ServerClient client, String message) {
+    public void execute(CommandServerClient client, String message) {
         StringBuilder stringBuilder = new StringBuilder();
         for (Command command : CommandManager.getInstance().commands()) {
             stringBuilder.append("Command: ").append(command.commandName()).append("\r\n");

@@ -1,7 +1,5 @@
 package commands;
 
-import server.ServerClient;
-
 import java.util.regex.Pattern;
 
 public class Exit implements Command {
@@ -16,7 +14,7 @@ public class Exit implements Command {
     }
 
     @Override
-    public void execute(ServerClient client, String message) {
+    public void execute(CommandServerClient client, String message) {
         client.close();
     }
 }

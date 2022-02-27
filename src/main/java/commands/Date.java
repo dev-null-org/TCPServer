@@ -1,7 +1,5 @@
 package commands;
 
-import server.ServerClient;
-
 import java.util.regex.Pattern;
 
 public class Date implements Command {
@@ -17,7 +15,7 @@ public class Date implements Command {
     }
 
     @Override
-    public void execute(ServerClient client, String message) {
+    public void execute(CommandServerClient client, String message) {
         client.println(new java.util.Date().toString());
     }
 }
