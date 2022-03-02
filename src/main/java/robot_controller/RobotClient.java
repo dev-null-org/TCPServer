@@ -253,6 +253,9 @@ public class RobotClient extends BasicServerClient {
                 recharging = true;
                 return readLine(maxLength + communicationSeparator.length);
             }
+            // if length of the input is bigger than maximum and does not exactly match any of the general commands
+            if (input_string.length() > maxLength)
+                throw new SyntaxException("Message to long for current max length and does not match any of general messages");
             this.server.log(getIdentifier() + " input: " + input_string + "\u001B[0m");
             return input_string;
         } catch (SocketTimeoutException e) {
