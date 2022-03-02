@@ -233,52 +233,57 @@ public class RobotClient extends BasicServerClient {
                     }
                     end_match = 0;
                     input_buffer.append(input_char);
-                    if (input_buffer.length() > maxLength) {
-                        String t = input_buffer.toString();
-                        int notMatching = 0;
-                        boolean[] generalMessageMatch = new boolean[generalMessages.length];
-                        Arrays.fill(generalMessageMatch, true);
-                        for (int i = 0; i < input_buffer.length(); i++) {
-                            for (int j = 0; j < generalMessages.length; j++) {
-                                if (generalMessageMatch[j]) {
-                                    String messageString = generalMessages[j].toString();
-                                    if (messageString.length() < t.length() ||
-                                            messageString.charAt(i) != t.charAt(i)) {
-                                        generalMessageMatch[j] = false;
-                                        notMatching++;
-
-                                        if (notMatching == generalMessageMatch.length) {
-                                            throw new SyntaxException("Message to long for current max length and does not match any of general messages");
-                                        }
-                                    }
-                                }
-                            }
-                        }
+                    if(!checkMessageLength(input_buffer.toString(), maxLength)){
+                        throw new SyntaxException("Message to long for current max length and does not match any of general messages");
                     }
                 }
             }
-            String string_input = input_buffer.toString();
-            boolean fullPowerMessage = string_input.equals(ResponseTypes.CLIENT_FULL_POWER.toString());
+            String input_string = input_buffer.toString();
+            boolean fullPowerMessage = input_string.equals(ResponseTypes.CLIENT_FULL_POWER.toString());
             if (recharging) {
                 if (!fullPowerMessage) {
-                    throw new LogicException("Nothing else then FULL_POWER message is expected after recharging status is received, got: '" + string_input + "'");
+                    throw new LogicException("Nothing else then FULL_POWER message is expected after recharging status is received, got: '" + input_string + "'");
                 }
                 recharging = false;
                 return readLine(maxLength + communicationSeparator.length);
             } else if (fullPowerMessage) {
                 throw new LogicException("Received FULL_POWER message while not recharging");
             }
-            if (string_input.equals(ResponseTypes.CLIENT_RECHARGING.toString())) {
+            if (input_string.equals(ResponseTypes.CLIENT_RECHARGING.toString())) {
                 recharging = true;
                 return readLine(maxLength + communicationSeparator.length);
             }
-            this.server.log(getIdentifier() + " input: " + input_buffer + "\u001B[0m");
-            return input_buffer.toString();
+            this.server.log(getIdentifier() + " input: " + input_string + "\u001B[0m");
+            return input_string;
         } catch (SocketTimeoutException e) {
             throw new TimeOutException("Timeout after limit of " + (recharging ? TIMEOUT_RECHARGING : TIMEOUT) + "s");
         } catch (IOException e) {
             throw new RobotException("Connection closed.");
         }
+    }
+
+    private boolean checkMessageLength(String input, int maxLength) {
+        if (input.length() <= maxLength) return true;
+        int notMatching = 0;
+        boolean[] generalMessageMatch = new boolean[generalMessages.length];
+        Arrays.fill(generalMessageMatch, true);
+        for (int i = 0; i < input.length(); i++) {
+            for (int j = 0; j < generalMessages.length; j++) {
+                if (generalMessageMatch[j]) {
+                    String messageString = generalMessages[j].toString();
+                    if (messageString.length() < input.length() ||
+                            messageString.charAt(i) != input.charAt(i)) {
+                        generalMessageMatch[j] = false;
+                        notMatching++;
+
+                        if (notMatching == generalMessageMatch.length) {
+                            return false;
+                        }
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     @Override
