@@ -192,6 +192,10 @@ public class RobotClient extends BasicServerClient {
         throw new SyntaxException("Client OK doesn't match the format required.");
     }
 
+    /**
+     * Print message and append separator then flush
+     * @param message string message without separator
+     */
     @Override
     public void print(String message) {
         log(message);
@@ -202,6 +206,17 @@ public class RobotClient extends BasicServerClient {
         output.flush();
     }
 
+    /**
+     * Reads message/line from the network socket separated by {@link #communicationSeparator}
+     *
+     * @param maxLength max length for the message, gets ignored if {@link #generalMessages} is inputted
+     * @return string message without the separator
+     * @throws RobotException throws:
+     *                        - SyntaxException if message length is more than the maximum given
+     *                        - LogicException if message received in wrong state of the bot (example 2 recharging commands in a row)
+     *                        - TimeOutException if robot did not receive any communication in minimum time period based on the state
+     *                        - RobotException when socket is unexpectedly closed
+     */
     public String readLine(int maxLength) throws RobotException {
         maxLength = maxLength - communicationSeparator.length;
         StringBuilder input_buffer = new StringBuilder();
@@ -233,7 +248,7 @@ public class RobotClient extends BasicServerClient {
                     }
                     end_match = 0;
                     input_buffer.append(input_char);
-                    if(!checkMessageLength(input_buffer.toString(), maxLength)){
+                    if (!checkMessageLength(input_buffer.toString(), maxLength)) {
                         throw new SyntaxException("Message to long for current max length and does not match any of general messages");
                     }
                 }
@@ -265,6 +280,15 @@ public class RobotClient extends BasicServerClient {
         }
     }
 
+    /**
+     * Check if message input length is more than maxLength
+     * if it is it will check if message starts with any of the general commands
+     * that can be used any time
+     *
+     * @param input     current command part
+     * @param maxLength max message length
+     * @return boolean true if message is valid, else otherwise
+     */
     private boolean checkMessageLength(String input, int maxLength) {
         if (input.length() <= maxLength) return true;
         int notMatching = 0;
@@ -288,6 +312,10 @@ public class RobotClient extends BasicServerClient {
         }
         return true;
     }
+
+    /**
+     * Overriding the welcome and bey message we don't need those for this project.
+     */
 
     @Override
     protected String goodBeyMessage() {
