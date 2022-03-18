@@ -34,6 +34,8 @@ public class RobotClient extends BasicServerClient {
     protected long hash;
     protected long confirmHash;
     private boolean recharging = false;
+    private Direction direction = null;
+    private Point position = null, oldPosition = null;
 
     public RobotClient(Socket socket, TCPServer server, boolean inQueue, ColorManager.Color logColor) {
         super(socket, server, inQueue, logColor);
@@ -61,13 +63,17 @@ public class RobotClient extends BasicServerClient {
         this.confirmHash = hash;
     }
 
-    private Point move() throws RobotException {
+    private void move() throws RobotException {
         print(ResponseTypes.SERVER_MOVE.toString());
-        return readPosition();
+        oldPosition = position;
+        position = readPosition();
+        if (oldPosition != null && !position.equals(oldPosition))
+            direction = oldPosition.getVector(position).toDirection();
     }
 
-    private void rotate(Direction from, Direction to) throws RobotException {
-        int leftTurnCount = (from.value - to.value + 4) % 4;
+    private void rotate(Direction to) throws RobotException {
+        log("rotate from: " + direction + " to " + to);
+        int leftTurnCount = (direction.value - to.value + 4) % 4;
         switch (leftTurnCount) {
             case 1:
                 turnLeft();
@@ -80,6 +86,7 @@ public class RobotClient extends BasicServerClient {
                 turnRight();
                 break;
         }
+        direction = to;
     }
 
     private void turnRight() throws RobotException {
@@ -126,34 +133,28 @@ public class RobotClient extends BasicServerClient {
                 throw new LoginException("Confirmation hash doesn't match.");
             }
 
-            Point oldPosition = move();
-
-            Point position = move();
+            move();
+            move();
 
             if (oldPosition.equals(position)) {
                 turnRight();
-
-                Point helper = position;
-                position = move();
-                oldPosition = helper;
+                move();
             }
             assert !oldPosition.equals(position);
 
             Point target = Point.ZERO;
 
             while (!position.equals(target)) {
-                Direction direction = oldPosition.getVector(position).toDirection();
                 Direction desiredDirection = position.getVector(target).toDirection();
-                rotate(direction, desiredDirection);
+                rotate(desiredDirection);
 
-                oldPosition = position;
-                position = move();
+                move();
 
                 if (oldPosition.getVector(position).equals(Point.ZERO)) {
                     desiredDirection = position.getVector(target).toDirection(true);
-                    rotate(direction, desiredDirection);
+                    rotate(desiredDirection);
 
-                    position = move();
+                    move();
                     assert !oldPosition.equals(position);
                 }
             }
