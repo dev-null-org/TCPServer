@@ -234,8 +234,7 @@ public class RobotClient extends BasicServerClient {
                 assert input == input_char || input == -1;
 
                 if (input == -1) {
-                    close();
-                    return null;
+                    throw new RobotException("Closed while reading");
                 }
 
                 if (input == communicationSeparator[end_match]) {
