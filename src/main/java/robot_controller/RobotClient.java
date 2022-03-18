@@ -219,7 +219,6 @@ public class RobotClient extends BasicServerClient {
      *                        - RobotException when socket is unexpectedly closed
      */
     public String readLine(int maxLength) throws RobotException {
-        maxLength = maxLength - communicationSeparator.length;
         StringBuilder input_buffer = new StringBuilder();
         StringBuilder match_buffer = new StringBuilder();
         try {
@@ -249,7 +248,7 @@ public class RobotClient extends BasicServerClient {
                     }
                     end_match = 0;
                     input_buffer.append(input_char);
-                    if (!checkMessageLength(input_buffer.toString(), maxLength)) {
+                    if (!checkMessageLength(input_buffer.toString(), maxLength - communicationSeparator.length)) {
                         throw new SyntaxException("Message to long for current max length and does not match any of general messages");
                     }
                 }
@@ -261,16 +260,16 @@ public class RobotClient extends BasicServerClient {
                     throw new LogicException("Nothing else then FULL_POWER message is expected after recharging status is received, got: '" + input_string + "'");
                 }
                 recharging = false;
-                return readLine(maxLength + communicationSeparator.length);
+                return readLine(maxLength);
             } else if (fullPowerMessage) {
                 throw new LogicException("Received FULL_POWER message while not recharging");
             }
             if (input_string.equals(ResponseTypes.CLIENT_RECHARGING.toString())) {
                 recharging = true;
-                return readLine(maxLength + communicationSeparator.length);
+                return readLine(maxLength);
             }
             // if length of the input is bigger than maximum and does not exactly match any of the general commands
-            if (input_string.length() > maxLength)
+            if (input_string.length() > maxLength - communicationSeparator.length)
                 throw new SyntaxException("Message to long for current max length and does not match any of general messages");
             this.server.log(getIdentifier() + " input: " + input_string + "\u001B[0m");
             return input_string;
